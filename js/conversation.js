@@ -414,7 +414,14 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
         intervene() {
             if (!this.interventionText.trim()) return;
 
+            const wasRunning = this.state === 'running';
             const wasPaused = this.state === 'paused';
+
+            // If running, we need to interrupt and restart
+            if (wasRunning) {
+                this._aborted = true;
+                Alpine.store('voice').stop();
+            }
 
             this.messages.push({
                 role: 'user',
@@ -429,8 +436,14 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
             this.showIntervention = false;
             this._scrollToBottom();
 
-            if (wasPaused) {
-                this.resume();
+            // Restart the loop so agents see the new message
+            if (wasRunning || wasPaused) {
+                // Small delay to let the abort complete
+                setTimeout(() => {
+                    this._aborted = false;
+                    this.state = 'running';
+                    this._runLoop();
+                }, 100);
             }
         },
 
