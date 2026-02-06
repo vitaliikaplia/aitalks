@@ -107,11 +107,17 @@ document.addEventListener('alpine:init', () => {
         sidebarOpen: true,
         notification: '',
         notificationType: 'info',
+        voiceMuted: false,
 
         notify(message, type = 'info') {
             this.notification = message;
             this.notificationType = type;
             setTimeout(() => { this.notification = ''; }, 3000);
+        },
+
+        toggleMute() {
+            this.voiceMuted = !this.voiceMuted;
+            this.notify(this.voiceMuted ? 'Озвучку вимкнено 🔇' : 'Озвучку увімкнено 🔊');
         },
     });
 

@@ -446,6 +446,14 @@
                         &#9632; Стоп
                     </button>
 
+                    <button @click="$store.ui.toggleMute()"
+                            class="px-3 py-2 rounded-lg text-sm font-medium transition"
+                            :class="$store.ui.voiceMuted ? 'bg-gray-600 hover:bg-gray-500' : 'bg-purple-600 hover:bg-purple-700'"
+                            :title="$store.ui.voiceMuted ? 'Увімкнути озвучку' : 'Вимкнути озвучку'">
+                        <span x-show="!$store.ui.voiceMuted">&#128264;</span>
+                        <span x-show="$store.ui.voiceMuted">&#128263;</span>
+                    </button>
+
                     <div class="flex-1"></div>
 
                     <!-- Save/Load -->

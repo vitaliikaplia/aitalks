@@ -124,12 +124,13 @@ document.addEventListener('alpine:init', () => {
                     const hasVoiceKey = voiceProvider === 'openai_tts'
                         ? Alpine.store('settings').openaiKey
                         : Alpine.store('settings').elevenlabsKey;
+                    const isMuted = Alpine.store('ui').voiceMuted;
 
                     // Use prefetched TTS if available, otherwise start new TTS request
                     let currentTtsPromise = nextTtsPromise;
                     nextTtsPromise = null;
 
-                    if (!currentTtsPromise && agent.voiceId && hasVoiceKey) {
+                    if (!isMuted && !currentTtsPromise && agent.voiceId && hasVoiceKey) {
                         currentTtsPromise = voice.prefetchAudio(response, voiceProvider, agent.voiceId);
                     }
 
@@ -141,16 +142,16 @@ document.addEventListener('alpine:init', () => {
                         nextTextPromise = null;
                     }
 
-                    // Wait for current TTS and play it
-                    if (currentTtsPromise) {
+                    // Wait for current TTS and play it (if not muted)
+                    if (currentTtsPromise && !isMuted) {
                         const audioData = await currentTtsPromise;
                         if (this._aborted || this.state !== 'running') break;
 
-                        // While audio plays, also prefetch next agent's TTS
-                        if (nextTextPromise && nextAgent) {
+                        // While audio plays, also prefetch next agent's TTS (if not muted)
+                        if (nextTextPromise && nextAgent && !Alpine.store('ui').voiceMuted) {
                             // Wait for next text, then start its TTS
                             nextTextPromise.then(text => {
-                                if (this.state === 'running' && !this._aborted) {
+                                if (this.state === 'running' && !this._aborted && !Alpine.store('ui').voiceMuted) {
                                     nextResponse = text;
                                     const nextVoiceProvider = nextAgent.voiceProvider || 'openai_tts';
                                     const nextHasKey = nextVoiceProvider === 'openai_tts'
