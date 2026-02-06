@@ -240,6 +240,7 @@ document.addEventListener('alpine:init', () => {
                     model: agent.model,
                     messages: contextMessages,
                     length_level: settings.messageLengthLevel || 5,
+                    temperature: agent.temperature ?? 0.9,
                 }),
             });
 
@@ -263,32 +264,40 @@ document.addEventListener('alpine:init', () => {
                 .map(a => a.name)
                 .join(', ');
 
-            // Message length instruction based on level
+            // Message length instruction based on level (Ukrainian)
             const lengthInstructions = {
-                1: 'Keep responses EXTREMELY brief - just 2-5 words maximum, like quick reactions',
-                2: 'Keep responses very short - one brief sentence (5-10 words)',
-                3: 'Keep responses short - 1 sentence maximum (10-15 words)',
-                4: 'Keep responses concise - 1-2 short sentences',
-                5: 'Keep responses moderate - 2-3 sentences',
-                6: 'You may provide moderate detail (1-2 paragraphs)',
-                7: 'You may provide good detail (2-3 paragraphs)',
-                8: 'You may provide extensive detail (3-4 paragraphs)',
-                9: 'Provide detailed, comprehensive responses',
-                10: 'Provide very detailed, thorough responses',
+                1: 'Відповідай ДУЖЕ коротко — лише 2-5 слів, як швидка реакція',
+                2: 'Відповідай дуже коротко — одне коротке речення (5-10 слів)',
+                3: 'Відповідай коротко — максимум 1 речення (10-15 слів)',
+                4: 'Відповідай лаконічно — 1-2 коротких речення',
+                5: 'Відповідай помірно — 2-3 речення',
+                6: 'Можеш відповідати детальніше (1-2 абзаци)',
+                7: 'Можеш відповідати розгорнуто (2-3 абзаци)',
+                8: 'Можеш відповідати дуже детально (3-4 абзаци)',
+                9: 'Давай детальні, розгорнуті відповіді',
+                10: 'Давай дуже детальні, вичерпні відповіді',
             };
             const lengthInstruction = lengthInstructions[settings.messageLengthLevel] || lengthInstructions[5];
 
-            const systemPrompt = `You are ${agent.name}. ${agent.description}
+            // Analyze emotional state based on recent messages
+            const emotionalState = this._analyzeEmotionalState(agent);
 
-You are in a group conversation about: "${this.topic}"
-Other participants: ${otherAgents}
+            const systemPrompt = `Ти — ${agent.name}. ${agent.description}
 
-Rules:
-- Stay in character
+Ви ведете групову бесіду на тему: "${this.topic}"
+Інші учасники: ${otherAgents}
+
+${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emotionalState}\n` : ''}
+ВАЖЛИВО — говори як жива людина в чаті:
+- Використовуй неповні речення, вигуки, слова-паразити ("ну", "типу", "слухай", "о", "хм")
+- Реагуй емоційно — дратуйся, смійся, зітхай, дивуйся
+- Ставь риторичні запитання
+- Посилайся на те, що ЩОЙНО сказали інші — цитуй, сперечайся з конкретними словами
+- Не читай лекцій — це чат, а не дебати
+- Інколи відволікайся, жартуй, використовуй сленг
 - ${lengthInstruction}
-- React to what others have said
-- Be natural and conversational
-- Do not use action markers like *actions* unless it fits your character`;
+- Залишайся в образі свого персонажа
+- Не використовуй маркери дій типу *дія* якщо це не відповідає твоєму характеру`;
 
             // Recent messages
             const recent = this.messages
@@ -299,17 +308,63 @@ Rules:
 
             for (const msg of recent) {
                 if (msg.role === 'system') {
-                    contextMessages.push({ role: 'user', content: '[Topic announced] ' + msg.content });
+                    contextMessages.push({ role: 'user', content: '[Оголошено тему] ' + msg.content });
                 } else if (msg.agentId === agent.id) {
                     contextMessages.push({ role: 'assistant', content: msg.content });
                 } else if (msg.agentId === 'user') {
-                    contextMessages.push({ role: 'user', content: `[Moderator]: ${msg.content}` });
+                    contextMessages.push({ role: 'user', content: `[Модератор]: ${msg.content}` });
                 } else {
                     contextMessages.push({ role: 'user', content: `[${msg.agentName}]: ${msg.content}` });
                 }
             }
 
             return contextMessages;
+        },
+
+        _analyzeEmotionalState(agent) {
+            // Look at last few messages to determine emotional context
+            const recentMessages = this.messages.slice(-5);
+            if (recentMessages.length < 2) return '';
+
+            const agentMessages = recentMessages.filter(m => m.agentId === agent.id);
+            const otherMessages = recentMessages.filter(m => m.agentId !== agent.id && m.role !== 'system');
+
+            if (otherMessages.length === 0) return '';
+
+            const lastOtherMessage = otherMessages[otherMessages.length - 1];
+            const content = lastOtherMessage?.content?.toLowerCase() || '';
+
+            // Check if someone agreed with the agent
+            const agentName = agent.name.toLowerCase();
+            const agreementWords = ['згоден', 'згодна', 'правда', 'точно', 'так', 'підтримую', 'маєш рацію', 'слушно'];
+            const wasAgreedWith = agentMessages.length > 0 &&
+                agreementWords.some(w => content.includes(w)) &&
+                (content.includes(agentName) || otherMessages.length === 1);
+
+            if (wasAgreedWith) {
+                return 'Задоволений/задоволена — хтось щойно погодився з тобою. Можеш бути трохи самовдоволеним або розвинути свою думку з ентузіазмом.';
+            }
+
+            // Check if agent was attacked/criticized
+            const attackWords = ['дурниця', 'нісенітниця', 'помиляєшся', 'неправда', 'абсурд', 'смішно', 'наївно', 'примітивно', 'банально'];
+            const wasAttacked = agentMessages.length > 0 &&
+                attackWords.some(w => content.includes(w));
+
+            if (wasAttacked) {
+                return 'Захищаєшся — тебе щойно розкритикували або атакували. Можеш бути роздратованим, саркастичним або навпаки — підкреслено спокійним.';
+            }
+
+            // Check if there's a heated debate
+            const debateWords = ['але', 'проте', 'однак', 'ні,', 'не згоден', 'не згодна'];
+            const isHeatedDebate = recentMessages.filter(m =>
+                debateWords.some(w => m.content?.toLowerCase().includes(w))
+            ).length >= 2;
+
+            if (isHeatedDebate) {
+                return 'Дискусія загострюється — атмосфера напружена. Можеш підливати масла у вогонь або спробувати розрядити ситуацію.';
+            }
+
+            return '';
         },
 
         pause() {

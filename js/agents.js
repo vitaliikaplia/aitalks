@@ -25,6 +25,7 @@ document.addEventListener('alpine:init', () => {
                 voiceId: 'alloy',
                 provider: 'openai',
                 model: 'gpt-4o-mini',
+                temperature: 0.9,
                 enabled: true,
             };
         },

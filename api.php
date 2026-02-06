@@ -36,6 +36,9 @@ function handleChat($input) {
     $model = $input['model'] ?? '';
     $messages = $input['messages'] ?? [];
     $maxTokens = getMaxTokens($input);
+    $temperature = floatval($input['temperature'] ?? 0.9);
+    // Clamp temperature to valid range
+    $temperature = max(0.0, min(2.0, $temperature));
 
     if (!$apiKey) {
         header('Content-Type: application/json');
@@ -48,13 +51,13 @@ function handleChat($input) {
 
     switch ($provider) {
         case 'openai':
-            chatOpenAI($apiKey, $model, $messages, $maxTokens);
+            chatOpenAI($apiKey, $model, $messages, $maxTokens, $temperature);
             break;
         case 'claude':
-            chatClaude($apiKey, $model, $messages, $maxTokens);
+            chatClaude($apiKey, $model, $messages, $maxTokens, $temperature);
             break;
         case 'gemini':
-            chatGemini($apiKey, $model, $messages, $maxTokens);
+            chatGemini($apiKey, $model, $messages, $maxTokens, $temperature);
             break;
         default:
             http_response_code(400);
@@ -62,13 +65,13 @@ function handleChat($input) {
     }
 }
 
-function chatOpenAI($apiKey, $model, $messages, $maxTokens = 300) {
+function chatOpenAI($apiKey, $model, $messages, $maxTokens = 300, $temperature = 0.9) {
     $url = 'https://api.openai.com/v1/chat/completions';
     $data = [
         'model' => $model ?: 'gpt-4o-mini',
         'messages' => $messages,
         'max_tokens' => $maxTokens,
-        'temperature' => 0.9,
+        'temperature' => $temperature,
     ];
 
     $response = curlPost($url, $data, [
@@ -93,7 +96,7 @@ function chatOpenAI($apiKey, $model, $messages, $maxTokens = 300) {
     echo json_encode(['content' => $content]);
 }
 
-function chatClaude($apiKey, $model, $messages, $maxTokens = 300) {
+function chatClaude($apiKey, $model, $messages, $maxTokens = 300, $temperature = 0.9) {
     $url = 'https://api.anthropic.com/v1/messages';
 
     // Extract system message
@@ -127,6 +130,7 @@ function chatClaude($apiKey, $model, $messages, $maxTokens = 300) {
         'model' => $model ?: 'claude-sonnet-4-20250514',
         'max_tokens' => $maxTokens,
         'messages' => $claudeMessages,
+        'temperature' => $temperature,
     ];
     if ($system) {
         $data['system'] = $system;
@@ -162,7 +166,7 @@ function chatClaude($apiKey, $model, $messages, $maxTokens = 300) {
     echo json_encode(['content' => $content]);
 }
 
-function chatGemini($apiKey, $model, $messages, $maxTokens = 300) {
+function chatGemini($apiKey, $model, $messages, $maxTokens = 300, $temperature = 0.9) {
     $model = $model ?: 'gemini-2.0-flash';
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . $apiKey;
 
@@ -213,7 +217,7 @@ function chatGemini($apiKey, $model, $messages, $maxTokens = 300) {
         'contents' => $contents,
         'generationConfig' => [
             'maxOutputTokens' => $maxTokens,
-            'temperature' => 0.9,
+            'temperature' => $temperature,
         ],
     ];
     if ($systemInstruction) {

@@ -211,6 +211,17 @@
                                 </div>
                             </div>
 
+                            <div>
+                                <label class="text-xs text-gray-400">Температура (креативність): <span x-text="agent.temperature ?? 0.9"></span></label>
+                                <input type="range" x-model="agent.temperature" @input="$store.agents.persist()"
+                                       min="0.1" max="1.5" step="0.1"
+                                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                <div class="flex justify-between text-xs text-gray-500 mt-0.5">
+                                    <span>Точніше</span>
+                                    <span>Креативніше</span>
+                                </div>
+                            </div>
+
                             <div class="flex gap-1 pt-1">
                                 <button @click="$store.agents.duplicate(index)"
                                         class="text-xs bg-gray-600 hover:bg-gray-500 px-2 py-1 rounded transition">
