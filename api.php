@@ -23,11 +23,11 @@ if ($action === 'chat') {
 function getMaxTokens($input) {
     $level = intval($input['length_level'] ?? 5);
     $map = [
-        1 => 30,   2 => 60,   3 => 100,  4 => 200,
-        5 => 300,  6 => 500,  7 => 800,  8 => 1200,
+        1 => 50,   2 => 100,  3 => 150,  4 => 250,
+        5 => 400,  6 => 600,  7 => 900,  8 => 1300,
         9 => 1800, 10 => 2500,
     ];
-    return $map[$level] ?? 300;
+    return $map[$level] ?? 400;
 }
 
 function handleChat($input) {
