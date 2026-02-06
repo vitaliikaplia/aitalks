@@ -1,11 +1,11 @@
 document.addEventListener('alpine:init', () => {
     // Welcome store - initialize first to avoid race conditions
+    // Always show on page load (SPA has no internal navigation, so won't annoy users)
     Alpine.store('welcome', {
-        show: !localStorage.getItem('ait_welcome_seen'),
+        show: true,
 
         close() {
             this.show = false;
-            localStorage.setItem('ait_welcome_seen', '1');
         },
 
         openSettings() {
