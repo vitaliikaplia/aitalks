@@ -485,6 +485,13 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
             Alpine.store('agents').list = data.agents;
             Alpine.store('agents').persist();
             this.showLoadDialog = false;
+
+            // Set state to paused so user can continue the conversation
+            if (this.messages.length > 0) {
+                this.state = 'paused';
+            }
+
+            this._scrollToBottom();
             Alpine.store('ui').notify('Розмову завантажено: ' + name);
         },
 
