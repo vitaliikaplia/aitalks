@@ -1,4 +1,18 @@
 document.addEventListener('alpine:init', () => {
+    // Welcome store - initialize first to avoid race conditions
+    Alpine.store('welcome', {
+        show: !localStorage.getItem('ait_welcome_seen'),
+
+        close() {
+            this.show = false;
+            localStorage.setItem('ait_welcome_seen', '1');
+        },
+
+        openSettings() {
+            this.close();
+            Alpine.store('settings').open();
+        },
+    });
 
     // Settings store
     Alpine.store('settings', {
@@ -101,19 +115,4 @@ document.addEventListener('alpine:init', () => {
         },
     });
 
-    // Welcome store
-    Alpine.store('welcome', {
-        // Initialize show based on localStorage immediately
-        show: !localStorage.getItem('ait_welcome_seen'),
-
-        close() {
-            this.show = false;
-            localStorage.setItem('ait_welcome_seen', '1');
-        },
-
-        openSettings() {
-            this.close();
-            Alpine.store('settings').open();
-        },
-    });
 });
