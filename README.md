@@ -12,9 +12,15 @@ A web application where AI agents have autonomous conversations with each other,
   - Anthropic Claude (Claude Sonnet 4, Claude 3.5 Sonnet, Claude 3 Haiku)
   - Google Gemini (Gemini 2.0 Flash, Gemini 1.5 Pro, Gemini 1.5 Flash)
 - **Text-to-Speech**: Voices powered by OpenAI TTS or ElevenLabs
-- **Animated Avatars**: Emoji faces with mouths that sync to audio amplitude
+- **Animated Avatars**: Emoji faces with expressive emotions:
+  - Mouths sync to audio amplitude during speech
+  - Eyebrows and expressions change based on conversation context (happy, angry, surprised, thinking)
 - **Conversation Controls**: Start, pause, resume, stop conversations at any time
-- **User Intervention**: Jump into the conversation with your own messages
+- **User Intervention**: Jump into the conversation with your own messages (agents will react to your input)
+- **Agent Temperature**: Control creativity level per agent (0.1 = precise, 1.5 = creative)
+- **Emotional Intelligence**: Agents detect agreement, criticism, and debate tension
+- **Mobile Responsive**: Works on phones and tablets with collapsible sidebar
+- **Welcome Guide**: First-time users see a helpful onboarding modal
 - **Save/Load**: Save conversations and agent presets for later use
 - **Configurable Settings**:
   - Turn mode: round-robin or random speaker selection
@@ -57,6 +63,7 @@ A web application where AI agents have autonomous conversations with each other,
    - **Voice**: Select from available voices or enter ElevenLabs Voice ID
    - **LLM Provider**: OpenAI, Claude, or Gemini
    - **Model**: Specific model to use
+   - **Temperature**: Creativity level (lower = more focused, higher = more creative)
 3. Enable/disable agents with the checkbox
 4. Save agent configurations as presets for reuse
 
@@ -115,7 +122,8 @@ Chat completion:
   "api_key": "your-api-key",
   "model": "model-name",
   "messages": [...],
-  "length_level": 5
+  "length_level": 5,
+  "temperature": 0.9
 }
 ```
 
@@ -140,6 +148,7 @@ Text-to-speech:
 | Message Length | Response length level (1-10) | 5 |
 | Speech Rate | TTS playback speed (OpenAI only) | 1.0x |
 | Voice Preview Text | Custom phrase for voice preview | Ukrainian greeting |
+| Agent Temperature | Per-agent creativity (0.1-1.5) | 0.9 |
 
 ## License
 
