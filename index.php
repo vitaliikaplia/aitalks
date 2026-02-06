@@ -82,20 +82,12 @@
              x-transition:leave-end="opacity-0"></div>
 
         <!-- Sidebar: Agents -->
-        <aside class="bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-hidden
-                      fixed md:relative inset-y-0 left-0 z-30 w-72 md:w-80
-                      transform transition-transform duration-200 ease-in-out
-                      md:transform-none"
+        <aside class="bg-gray-800 border-r border-gray-700 flex flex-col overflow-hidden
+                      w-72 md:w-80 flex-shrink-0
+                      fixed md:static top-14 bottom-0 left-0 z-30
+                      transform transition-transform duration-200 ease-in-out md:transform-none"
                :class="$store.ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-               style="top: 56px;"
-               x-init="
-                   // On mobile, start with sidebar closed
-                   if (window.innerWidth < 768) $store.ui.sidebarOpen = false;
-                   // Close sidebar when clicking a conversation start on mobile
-                   window.addEventListener('resize', () => {
-                       if (window.innerWidth >= 768) $store.ui.sidebarOpen = true;
-                   });
-               ">
+               x-init="if (window.innerWidth < 768) $store.ui.sidebarOpen = false; window.addEventListener('resize', () => { if (window.innerWidth >= 768) $store.ui.sidebarOpen = true; })">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
                 <h2 class="font-semibold text-sm uppercase tracking-wide text-gray-400">Агенти</h2>
                 <button @click="$store.agents.add()"
