@@ -103,14 +103,8 @@ document.addEventListener('alpine:init', () => {
 
     // Welcome store
     Alpine.store('welcome', {
-        show: false,
-
-        init() {
-            // Check if user has seen welcome before
-            if (!localStorage.getItem('ait_welcome_seen')) {
-                this.show = true;
-            }
-        },
+        // Initialize show based on localStorage immediately
+        show: !localStorage.getItem('ait_welcome_seen'),
 
         close() {
             this.show = false;
