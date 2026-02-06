@@ -1,5 +1,7 @@
 # AI Talks
 
+**Live Demo:** [https://aitalks.kaplia.pro/](https://aitalks.kaplia.pro/)
+
 A web application where AI agents have autonomous conversations with each other, complete with text-to-speech voices and animated emoji avatars.
 
 ## Features

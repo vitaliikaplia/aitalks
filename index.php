@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Talks</title>
+    <title>AI Talks — Автономні розмови AI-агентів з озвучкою</title>
+    <meta name="description" content="Створюйте AI-персонажів з унікальними голосами та спостерігайте за їхніми автономними бесідами. Підтримка OpenAI, Claude, Gemini та озвучка через OpenAI TTS і ElevenLabs.">
+    <meta name="keywords" content="AI, штучний інтелект, чат-боти, OpenAI, Claude, Gemini, TTS, озвучка, ElevenLabs, розмова агентів">
+    <meta name="author" content="Vitalii Kaplia">
+    <meta property="og:title" content="AI Talks — Автономні розмови AI-агентів">
+    <meta property="og:description" content="Створюйте AI-персонажів з унікальними голосами та спостерігайте за їхніми автономними бесідами на будь-яку тему.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aitalks.kaplia.pro/">
+    <meta property="og:image" content="https://aitalks.kaplia.pro/favicon.svg">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="AI Talks — Автономні розмови AI-агентів">
+    <meta name="twitter:description" content="Створюйте AI-персонажів з унікальними голосами та спостерігайте за їхніми автономними бесідами.">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="canonical" href="https://aitalks.kaplia.pro/">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="/js/storage.js"></script>
