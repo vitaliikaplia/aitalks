@@ -146,10 +146,20 @@
                                         </select>
                                         <button @click="$store.voice.previewVoice(agent.voiceId)"
                                                 class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs transition flex items-center gap-1"
+                                                :class="{ 'opacity-50 cursor-wait': $store.voice.isLoadingPreview }"
+                                                :disabled="$store.voice.isLoadingPreview"
                                                 title="Прослухати голос">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 3.5a.75.75 0 00-1.264-.546L5.203 6H2.667a.75.75 0 00-.75.75v6.5c0 .414.336.75.75.75h2.536l3.533 3.046A.75.75 0 0010 16.5v-13zm5.95 1.3a.75.75 0 011.06.04 10.04 10.04 0 010 10.32.75.75 0 11-1.1-1.02 8.54 8.54 0 000-8.28.75.75 0 01.04-1.06zm-2.829 2.828a.75.75 0 011.061.039 6.003 6.003 0 010 5.666.75.75 0 11-1.1-1.02 4.503 4.503 0 000-4.626.75.75 0 01.039-1.06z"/>
-                                            </svg>
+                                            <template x-if="!$store.voice.isLoadingPreview">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 3.5a.75.75 0 00-1.264-.546L5.203 6H2.667a.75.75 0 00-.75.75v6.5c0 .414.336.75.75.75h2.536l3.533 3.046A.75.75 0 0010 16.5v-13zm5.95 1.3a.75.75 0 011.06.04 10.04 10.04 0 010 10.32.75.75 0 11-1.1-1.02 8.54 8.54 0 000-8.28.75.75 0 01.04-1.06zm-2.829 2.828a.75.75 0 011.061.039 6.003 6.003 0 010 5.666.75.75 0 11-1.1-1.02 4.503 4.503 0 000-4.626.75.75 0 01.039-1.06z"/>
+                                                </svg>
+                                            </template>
+                                            <template x-if="$store.voice.isLoadingPreview">
+                                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            </template>
                                         </button>
                                     </div>
                                 </template>
@@ -161,11 +171,19 @@
                                         <button @click="$store.voice.previewVoiceElevenlabs(agent.voiceId)"
                                                 class="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs transition flex items-center gap-1"
                                                 title="Прослухати голос"
-                                                :disabled="!agent.voiceId"
-                                                :class="{ 'opacity-50 cursor-not-allowed': !agent.voiceId }">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 3.5a.75.75 0 00-1.264-.546L5.203 6H2.667a.75.75 0 00-.75.75v6.5c0 .414.336.75.75.75h2.536l3.533 3.046A.75.75 0 0010 16.5v-13zm5.95 1.3a.75.75 0 011.06.04 10.04 10.04 0 010 10.32.75.75 0 11-1.1-1.02 8.54 8.54 0 000-8.28.75.75 0 01.04-1.06zm-2.829 2.828a.75.75 0 011.061.039 6.003 6.003 0 010 5.666.75.75 0 11-1.1-1.02 4.503 4.503 0 000-4.626.75.75 0 01.039-1.06z"/>
-                                            </svg>
+                                                :disabled="!agent.voiceId || $store.voice.isLoadingPreview"
+                                                :class="{ 'opacity-50': !agent.voiceId || $store.voice.isLoadingPreview, 'cursor-not-allowed': !agent.voiceId, 'cursor-wait': $store.voice.isLoadingPreview }">
+                                            <template x-if="!$store.voice.isLoadingPreview">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 3.5a.75.75 0 00-1.264-.546L5.203 6H2.667a.75.75 0 00-.75.75v6.5c0 .414.336.75.75.75h2.536l3.533 3.046A.75.75 0 0010 16.5v-13zm5.95 1.3a.75.75 0 011.06.04 10.04 10.04 0 010 10.32.75.75 0 11-1.1-1.02 8.54 8.54 0 000-8.28.75.75 0 01.04-1.06zm-2.829 2.828a.75.75 0 011.061.039 6.003 6.003 0 010 5.666.75.75 0 11-1.1-1.02 4.503 4.503 0 000-4.626.75.75 0 01.039-1.06z"/>
+                                                </svg>
+                                            </template>
+                                            <template x-if="$store.voice.isLoadingPreview">
+                                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            </template>
                                         </button>
                                     </div>
                                 </template>
@@ -544,6 +562,102 @@
             <div class="flex justify-end">
                 <button @click="$store.conversation.showLoadDialog = false"
                         class="px-3 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-sm transition">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Modal -->
+    <div x-show="$store.welcome.show" x-cloak
+         class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100">
+        <div class="bg-gray-800 border border-gray-600 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100">
+
+            <!-- Header with emoji -->
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
+                <div class="text-5xl mb-3">&#127917;</div>
+                <h2 class="text-2xl font-bold">Ласкаво просимо до AI Talks!</h2>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto scrollbar-thin">
+                <p class="text-gray-300">
+                    <strong>AI Talks</strong> — це унікальний додаток, де AI-агенти спілкуються між собою автономно,
+                    з реалістичними голосами та анімованими аватарами.
+                </p>
+
+                <div class="bg-gray-700/50 rounded-lg p-4 space-y-3">
+                    <h3 class="font-semibold text-blue-400 flex items-center gap-2">
+                        <span class="text-xl">&#129504;</span> Мозок агентів (LLM)
+                    </h3>
+                    <p class="text-sm text-gray-300">
+                        Для генерації діалогів потрібен API ключ від одного з провайдерів:
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1 ml-4">
+                        <li><strong class="text-green-400">OpenAI</strong> — GPT-4o, GPT-4o-mini та інші.
+                            <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-400 hover:underline">Отримати ключ</a>
+                        </li>
+                        <li><strong class="text-orange-400">Anthropic Claude</strong> — Claude Sonnet 4, Claude 3.5.
+                            <a href="https://console.anthropic.com/settings/keys" target="_blank" class="text-blue-400 hover:underline">Отримати ключ</a>
+                        </li>
+                        <li><strong class="text-blue-400">Google Gemini</strong> — Gemini 2.0 Flash, Gemini 1.5 Pro.
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-400 hover:underline">Отримати ключ</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-700/50 rounded-lg p-4 space-y-3">
+                    <h3 class="font-semibold text-purple-400 flex items-center gap-2">
+                        <span class="text-xl">&#127908;</span> Голос агентів (TTS)
+                    </h3>
+                    <p class="text-sm text-gray-300">
+                        Для озвучування діалогів можна використати:
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1 ml-4">
+                        <li><strong class="text-green-400">OpenAI TTS</strong> — 13 реалістичних голосів, використовує той самий ключ що й GPT.</li>
+                        <li><strong class="text-purple-400">ElevenLabs</strong> — преміум голоси з клонуванням. Потрібен окремий ключ.
+                            <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" class="text-blue-400 hover:underline">Отримати ключ</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-700/50 rounded-lg p-4 space-y-2">
+                    <h3 class="font-semibold text-emerald-400 flex items-center gap-2">
+                        <span class="text-xl">&#128640;</span> Як почати
+                    </h3>
+                    <ol class="text-sm text-gray-300 space-y-1 ml-4 list-decimal">
+                        <li>Відкрийте <strong>Налаштування</strong> (іконка шестерні) і додайте API ключі</li>
+                        <li>Створіть мінімум <strong>2 агенти</strong> з іменами та описом характеру</li>
+                        <li>Оберіть голос та модель для кожного агента</li>
+                        <li>Введіть тему та натисніть <strong>Старт</strong></li>
+                        <li>Насолоджуйтесь автономною розмовою!</li>
+                    </ol>
+                </div>
+
+                <p class="text-xs text-gray-500 text-center">
+                    Ваші API ключі зберігаються локально у вашому браузері та ніколи не передаються нікуди, окрім офіційних API.
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-700 flex gap-3">
+                <button @click="$store.welcome.close()"
+                        class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-sm font-medium transition">
+                    Закрити
+                </button>
+                <button @click="$store.welcome.openSettings()"
+                        class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Налаштування
+                </button>
             </div>
         </div>
     </div>

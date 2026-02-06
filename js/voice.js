@@ -4,6 +4,7 @@ document.addEventListener('alpine:init', () => {
         isSpeaking: false,
         speakingAgentId: null,
         mouthOpenness: 0,
+        isLoadingPreview: false,
         _audioCtx: null,
         _analyser: null,
         _source: null,
@@ -208,6 +209,8 @@ document.addEventListener('alpine:init', () => {
 
         // Preview OpenAI voice sample
         async previewVoice(voiceId) {
+            if (this.isLoadingPreview) return;
+
             const settings = Alpine.store('settings');
             const apiKey = settings.openaiKey;
 
@@ -224,16 +227,20 @@ document.addEventListener('alpine:init', () => {
             const previewText = settings.voicePreviewText || 'Привіт! Це приклад мого голосу. Як тобі?';
 
             try {
-                Alpine.store('ui').notify('Завантаження голосу...');
+                this.isLoadingPreview = true;
                 await this.speak(previewText, 'openai_tts', voiceId, 'preview');
             } catch (err) {
                 console.error('Preview error:', err);
                 Alpine.store('ui').notify('Не вдалося відтворити голос', 'error');
+            } finally {
+                this.isLoadingPreview = false;
             }
         },
 
         // Preview ElevenLabs voice sample
         async previewVoiceElevenlabs(voiceId) {
+            if (this.isLoadingPreview) return;
+
             const settings = Alpine.store('settings');
             const apiKey = settings.elevenlabsKey;
 
@@ -250,11 +257,13 @@ document.addEventListener('alpine:init', () => {
             const previewText = settings.voicePreviewText || 'Привіт! Це приклад мого голосу. Як тобі?';
 
             try {
-                Alpine.store('ui').notify('Завантаження голосу...');
+                this.isLoadingPreview = true;
                 await this.speak(previewText, 'elevenlabs', voiceId, 'preview');
             } catch (err) {
                 console.error('Preview error:', err);
                 Alpine.store('ui').notify('Не вдалося відтворити голос', 'error');
+            } finally {
+                this.isLoadingPreview = false;
             }
         },
 

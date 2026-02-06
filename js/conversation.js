@@ -20,12 +20,36 @@ document.addEventListener('alpine:init', () => {
 
         async start() {
             const agents = Alpine.store('agents');
+            const settings = Alpine.store('settings');
+
             if (!agents.canStart()) {
                 Alpine.store('ui').notify('Потрібно мінімум 2 агенти з іменем та описом', 'error');
                 return;
             }
             if (!this.topic.trim()) {
                 Alpine.store('ui').notify('Спочатку введіть тему', 'error');
+                return;
+            }
+
+            // Check API keys for all enabled agents
+            const enabledAgents = agents.list.filter(a => a.enabled && a.name.trim() && a.description.trim());
+            const missingKeys = [];
+            for (const agent of enabledAgents) {
+                const apiKey = settings.getKeyForProvider(agent.provider);
+                if (!apiKey) {
+                    missingKeys.push({ agent: agent.name, provider: agent.provider });
+                }
+            }
+
+            if (missingKeys.length > 0) {
+                const providers = [...new Set(missingKeys.map(m => m.provider))];
+                const providerNames = {
+                    openai: 'OpenAI',
+                    claude: 'Anthropic Claude',
+                    gemini: 'Google Gemini',
+                };
+                const names = providers.map(p => providerNames[p] || p).join(', ');
+                Alpine.store('ui').notify(`Додайте API ключ для: ${names}`, 'error');
                 return;
             }
 
@@ -91,9 +115,11 @@ document.addEventListener('alpine:init', () => {
                         ? Alpine.store('settings').openaiKey
                         : Alpine.store('settings').elevenlabsKey;
 
-                    // Start TTS for current agent
-                    let currentTtsPromise = null;
-                    if (agent.voiceId && hasVoiceKey) {
+                    // Use prefetched TTS if available, otherwise start new TTS request
+                    let currentTtsPromise = nextTtsPromise;
+                    nextTtsPromise = null;
+
+                    if (!currentTtsPromise && agent.voiceId && hasVoiceKey) {
                         currentTtsPromise = voice.prefetchAudio(response, voiceProvider, agent.voiceId);
                     }
 
@@ -149,8 +175,8 @@ document.addEventListener('alpine:init', () => {
                         nextTextPromise = null;
                     }
 
-                    // Small pause between turns
-                    await this._sleep(200);
+                    // Small pause between turns (shorter if TTS was prefetched)
+                    await this._sleep(100);
 
                 } catch (err) {
                     console.error('Generation error:', err);

@@ -100,4 +100,26 @@ document.addEventListener('alpine:init', () => {
             setTimeout(() => { this.notification = ''; }, 3000);
         },
     });
+
+    // Welcome store
+    Alpine.store('welcome', {
+        show: false,
+
+        init() {
+            // Check if user has seen welcome before
+            if (!localStorage.getItem('ait_welcome_seen')) {
+                this.show = true;
+            }
+        },
+
+        close() {
+            this.show = false;
+            localStorage.setItem('ait_welcome_seen', '1');
+        },
+
+        openSettings() {
+            this.close();
+            Alpine.store('settings').open();
+        },
+    });
 });
