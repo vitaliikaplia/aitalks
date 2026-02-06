@@ -489,6 +489,7 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
             // Set state to paused so user can continue the conversation
             if (this.messages.length > 0) {
                 this.state = 'paused';
+                this._aborted = false; // Reset abort flag so resume() works
             }
 
             this._scrollToBottom();
