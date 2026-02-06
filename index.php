@@ -271,22 +271,63 @@
             <div class="bg-gray-800/50 border-b border-gray-700 px-4 py-2 flex items-center gap-3 flex-shrink-0"
                  x-show="$store.agents.list.some(a => a.enabled && a.name.trim())">
                 <template x-for="agent in $store.agents.list.filter(a => a.enabled && a.name.trim())" :key="agent.id">
-                    <div class="flex flex-col items-center gap-1">
+                    <div class="flex flex-col items-center gap-1"
+                         x-data="{ get emotion() { return $store.conversation.getAgentEmotion(agent.id) } }">
                         <!-- Animated face -->
                         <svg width="48" height="48" viewBox="0 0 48 48"
-                             :class="{ 'ring-2 ring-yellow-400 rounded-full': $store.voice.speakingAgentId === agent.id }">
+                             :class="{ 'ring-2 ring-yellow-400 rounded-full': $store.voice.speakingAgentId === agent.id }"
+                             class="transition-all duration-300">
                             <!-- Head -->
                             <circle cx="24" cy="24" r="22" :fill="agent.color" />
+
+                            <!-- Left eyebrow -->
+                            <line x1="12" x2="20"
+                                  :y1="emotion === 'angry' ? 11 : (emotion === 'surprised' ? 8 : 10)"
+                                  :y2="emotion === 'angry' ? 9 : (emotion === 'surprised' ? 8 : 10)"
+                                  stroke="#333" stroke-width="2" stroke-linecap="round"
+                                  :transform="emotion === 'thinking' ? 'rotate(-10, 16, 10)' : ''"
+                                  class="transition-all duration-300" />
+                            <!-- Right eyebrow -->
+                            <line x1="28" x2="36"
+                                  :y1="emotion === 'angry' ? 9 : (emotion === 'surprised' ? 8 : 10)"
+                                  :y2="emotion === 'angry' ? 11 : (emotion === 'surprised' ? 8 : 10)"
+                                  stroke="#333" stroke-width="2" stroke-linecap="round"
+                                  :transform="emotion === 'thinking' ? 'rotate(10, 32, 10)' : ''"
+                                  class="transition-all duration-300" />
+
                             <!-- Left eye -->
-                            <circle cx="16" cy="18" r="3" fill="white" />
-                            <circle cx="16" cy="18" r="1.5" fill="#333" />
+                            <ellipse cx="16" cy="18"
+                                     :rx="emotion === 'happy' ? 3 : (emotion === 'surprised' ? 3.5 : 3)"
+                                     :ry="emotion === 'happy' ? 1.5 : (emotion === 'surprised' ? 4 : 3)"
+                                     fill="white" class="transition-all duration-300" />
+                            <circle cx="16" cy="18" r="1.5" fill="#333"
+                                    :class="{ 'hidden': emotion === 'happy' }" />
                             <!-- Right eye -->
-                            <circle cx="32" cy="18" r="3" fill="white" />
-                            <circle cx="32" cy="18" r="1.5" fill="#333" />
-                            <!-- Mouth - animated based on voice -->
-                            <ellipse cx="24" cy="33" rx="6"
+                            <ellipse cx="32" cy="18"
+                                     :rx="emotion === 'happy' ? 3 : (emotion === 'surprised' ? 3.5 : 3)"
+                                     :ry="emotion === 'happy' ? 1.5 : (emotion === 'surprised' ? 4 : 3)"
+                                     fill="white" class="transition-all duration-300" />
+                            <circle cx="32" cy="18" r="1.5" fill="#333"
+                                    :class="{ 'hidden': emotion === 'happy' }" />
+
+                            <!-- Mouth - different shapes based on emotion and voice -->
+                            <!-- Happy mouth (smile arc) -->
+                            <path x-show="emotion === 'happy' && $store.voice.getMouth(agent.id) < 0.2"
+                                  d="M 16 32 Q 24 40, 32 32" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" />
+                            <!-- Angry mouth (frown) -->
+                            <path x-show="emotion === 'angry' && $store.voice.getMouth(agent.id) < 0.2"
+                                  d="M 16 36 Q 24 30, 32 36" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" />
+                            <!-- Surprised mouth (O shape) -->
+                            <ellipse x-show="emotion === 'surprised' && $store.voice.getMouth(agent.id) < 0.2"
+                                     cx="24" cy="34" rx="4" ry="5" fill="white" />
+                            <!-- Thinking mouth (slight line) -->
+                            <line x-show="emotion === 'thinking' && $store.voice.getMouth(agent.id) < 0.2"
+                                  x1="18" y1="34" x2="30" y2="33" stroke="white" stroke-width="2" stroke-linecap="round" />
+                            <!-- Neutral/speaking mouth (animated ellipse) -->
+                            <ellipse x-show="emotion === 'neutral' || $store.voice.getMouth(agent.id) >= 0.2"
+                                     cx="24" cy="33" rx="6"
                                      :ry="Math.max(1, $store.voice.getMouth(agent.id) * 6)"
-                                     fill="white" />
+                                     fill="white" class="transition-all duration-75" />
                         </svg>
                         <span class="text-xs text-gray-400 truncate max-w-[60px]" x-text="agent.name"></span>
                     </div>

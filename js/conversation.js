@@ -13,6 +13,7 @@ document.addEventListener('alpine:init', () => {
         saveDialogName: '',
         showSaveDialog: false,
         showLoadDialog: false,
+        agentEmotions: {}, // { agentId: 'neutral' | 'happy' | 'angry' | 'thinking' | 'surprised' }
 
         init() {
             this.savedConversations = Storage.listConversations();
@@ -57,6 +58,7 @@ document.addEventListener('alpine:init', () => {
             this.currentAgentIndex = 0;
             this.state = 'running';
             this._aborted = false;
+            this.agentEmotions = {};
 
             // Add topic as system message
             this.messages.push({
@@ -324,12 +326,18 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
         _analyzeEmotionalState(agent) {
             // Look at last few messages to determine emotional context
             const recentMessages = this.messages.slice(-5);
-            if (recentMessages.length < 2) return '';
+            if (recentMessages.length < 2) {
+                this.agentEmotions[agent.id] = 'neutral';
+                return '';
+            }
 
             const agentMessages = recentMessages.filter(m => m.agentId === agent.id);
             const otherMessages = recentMessages.filter(m => m.agentId !== agent.id && m.role !== 'system');
 
-            if (otherMessages.length === 0) return '';
+            if (otherMessages.length === 0) {
+                this.agentEmotions[agent.id] = 'neutral';
+                return '';
+            }
 
             const lastOtherMessage = otherMessages[otherMessages.length - 1];
             const content = lastOtherMessage?.content?.toLowerCase() || '';
@@ -342,6 +350,7 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
                 (content.includes(agentName) || otherMessages.length === 1);
 
             if (wasAgreedWith) {
+                this.agentEmotions[agent.id] = 'happy';
                 return 'Задоволений/задоволена — хтось щойно погодився з тобою. Можеш бути трохи самовдоволеним або розвинути свою думку з ентузіазмом.';
             }
 
@@ -351,6 +360,7 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
                 attackWords.some(w => content.includes(w));
 
             if (wasAttacked) {
+                this.agentEmotions[agent.id] = 'angry';
                 return 'Захищаєшся — тебе щойно розкритикували або атакували. Можеш бути роздратованим, саркастичним або навпаки — підкреслено спокійним.';
             }
 
@@ -361,10 +371,24 @@ ${emotionalState ? `ТВІЙ ПОТОЧНИЙ ЕМОЦІЙНИЙ СТАН: ${emo
             ).length >= 2;
 
             if (isHeatedDebate) {
+                this.agentEmotions[agent.id] = 'thinking';
                 return 'Дискусія загострюється — атмосфера напружена. Можеш підливати масла у вогонь або спробувати розрядити ситуацію.';
             }
 
+            // Check for surprise/question in last message
+            const surpriseWords = ['справді?', 'серйозно?', 'невже', 'ого', 'вау', 'що?!', 'як?!'];
+            const isSurprised = surpriseWords.some(w => content.includes(w));
+            if (isSurprised) {
+                this.agentEmotions[agent.id] = 'surprised';
+                return '';
+            }
+
+            this.agentEmotions[agent.id] = 'neutral';
             return '';
+        },
+
+        getAgentEmotion(agentId) {
+            return this.agentEmotions[agentId] || 'neutral';
         },
 
         pause() {
