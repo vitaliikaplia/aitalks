@@ -638,9 +638,16 @@
                     </ol>
                 </div>
 
-                <p class="text-xs text-gray-500 text-center">
-                    Ваші API ключі зберігаються локально у вашому браузері та ніколи не передаються нікуди, окрім офіційних API.
-                </p>
+                <div class="bg-emerald-900/30 border border-emerald-700/50 rounded-lg p-3 space-y-1">
+                    <h3 class="font-semibold text-emerald-400 flex items-center gap-2 text-sm">
+                        <span>&#128274;</span> Безпека ваших даних
+                    </h3>
+                    <p class="text-xs text-gray-400">
+                        Всі налаштування та API ключі зберігаються <strong class="text-gray-300">виключно у localStorage вашого браузера</strong>.
+                        Ми не маємо серверної бази даних і не збираємо жодних даних. Ключі передаються напряму до офіційних API
+                        (OpenAI, Anthropic, Google, ElevenLabs) і нікуди більше. Ви можете безпечно зберігати свої ключі в додатку.
+                    </p>
+                </div>
             </div>
 
             <!-- Footer -->
