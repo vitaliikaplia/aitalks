@@ -44,9 +44,18 @@
 
     <!-- Header -->
     <header class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between flex-shrink-0">
-        <h1 class="text-xl font-bold flex items-center gap-2">
-            <span class="text-2xl">&#127917;</span> AI Talks
-        </h1>
+        <div class="flex items-center gap-2">
+            <!-- Mobile menu button -->
+            <button @click="$store.ui.sidebarOpen = !$store.ui.sidebarOpen"
+                    class="p-2 hover:bg-gray-700 rounded-lg transition md:hidden" title="Меню">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <span class="text-2xl">&#127917;</span> <span class="hidden sm:inline">AI Talks</span>
+            </h1>
+        </div>
         <button @click="$store.settings.open()"
                 class="p-2 hover:bg-gray-700 rounded-lg transition" title="Налаштування">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,10 +67,35 @@
     </header>
 
     <!-- Main content -->
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- Mobile sidebar overlay -->
+        <div x-show="$store.ui.sidebarOpen"
+             x-cloak
+             @click="$store.ui.sidebarOpen = false"
+             class="fixed inset-0 bg-black/50 z-20 md:hidden"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
 
         <!-- Sidebar: Agents -->
-        <aside class="w-80 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-hidden">
+        <aside class="bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0 overflow-hidden
+                      fixed md:relative inset-y-0 left-0 z-30 w-72 md:w-80
+                      transform transition-transform duration-200 ease-in-out
+                      md:transform-none"
+               :class="$store.ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+               style="top: 56px;"
+               x-init="
+                   // On mobile, start with sidebar closed
+                   if (window.innerWidth < 768) $store.ui.sidebarOpen = false;
+                   // Close sidebar when clicking a conversation start on mobile
+                   window.addEventListener('resize', () => {
+                       if (window.innerWidth >= 768) $store.ui.sidebarOpen = true;
+                   });
+               ">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
                 <h2 class="font-semibold text-sm uppercase tracking-wide text-gray-400">Агенти</h2>
                 <button @click="$store.agents.add()"

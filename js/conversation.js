@@ -54,6 +54,14 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
+            // Unlock audio for mobile browsers (must be in user interaction handler)
+            await Alpine.store('voice').unlockAudio();
+
+            // Close sidebar on mobile when conversation starts
+            if (window.innerWidth < 768) {
+                Alpine.store('ui').sidebarOpen = false;
+            }
+
             this.messages = [];
             this.currentAgentIndex = 0;
             this.state = 'running';

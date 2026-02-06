@@ -10,12 +10,35 @@ document.addEventListener('alpine:init', () => {
         _source: null,
         _animFrame: null,
         _resolve: null,
+        _audioUnlocked: false,
 
         _getAudioContext() {
             if (!this._audioCtx) {
                 this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
             return this._audioCtx;
+        },
+
+        // Unlock audio for iOS/mobile browsers - must be called from user interaction
+        async unlockAudio() {
+            if (this._audioUnlocked) return;
+
+            const ctx = this._getAudioContext();
+
+            // Resume if suspended
+            if (ctx.state === 'suspended') {
+                await ctx.resume();
+            }
+
+            // Play a silent buffer to fully unlock
+            const buffer = ctx.createBuffer(1, 1, 22050);
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start(0);
+
+            this._audioUnlocked = true;
+            console.log('[Audio] Unlocked for mobile playback');
         },
 
         async speak(text, voiceProvider, voiceId, agentId) {
@@ -29,7 +52,12 @@ document.addEventListener('alpine:init', () => {
                 apiKey = settings.elevenlabsKey;
             }
 
-            if (!apiKey || !voiceId) return;
+            console.log('[TTS] speak() called:', { voiceProvider, voiceId, agentId, hasApiKey: !!apiKey });
+
+            if (!apiKey || !voiceId) {
+                console.warn('[TTS] Missing apiKey or voiceId, skipping');
+                return;
+            }
 
             // Trim text for TTS (avoid very long audio)
             const ttsText = text.length > 500 ? text.substring(0, 500) + '...' : text;
@@ -48,27 +76,34 @@ document.addEventListener('alpine:init', () => {
                     requestBody.speed = settings.speechRate || 1.0;
                 }
 
+                console.log('[TTS] Sending request:', { ...requestBody, api_key: '***' });
+
                 const response = await fetch('/api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody),
                 });
 
+                console.log('[TTS] Response status:', response.status, response.statusText);
+
                 if (!response.ok) {
                     const contentType = response.headers.get('content-type') || '';
+                    console.log('[TTS] Response content-type:', contentType);
                     if (contentType.includes('application/json')) {
                         const err = await response.json();
-                        console.error('TTS error:', err.error);
+                        console.error('[TTS] API error:', err.error);
                     } else {
-                        console.error('TTS error:', response.status);
+                        const text = await response.text();
+                        console.error('[TTS] Non-JSON error response:', text.substring(0, 500));
                     }
                     return;
                 }
 
                 const audioData = await response.arrayBuffer();
+                console.log('[TTS] Audio received, size:', audioData.byteLength, 'bytes');
                 await this._playWithAnimation(audioData, agentId);
             } catch (err) {
-                console.error('TTS error:', err);
+                console.error('[TTS] Exception:', err);
             }
         },
 
@@ -166,7 +201,12 @@ document.addEventListener('alpine:init', () => {
                 apiKey = settings.elevenlabsKey;
             }
 
-            if (!apiKey || !voiceId) return null;
+            console.log('[TTS] prefetchAudio() called:', { voiceProvider, voiceId, hasApiKey: !!apiKey });
+
+            if (!apiKey || !voiceId) {
+                console.warn('[TTS] prefetch: Missing apiKey or voiceId, skipping');
+                return null;
+            }
 
             const ttsText = text.length > 500 ? text.substring(0, 500) + '...' : text;
 
@@ -183,20 +223,33 @@ document.addEventListener('alpine:init', () => {
                     requestBody.speed = settings.speechRate || 1.0;
                 }
 
+                console.log('[TTS] prefetch request:', { ...requestBody, api_key: '***' });
+
                 const response = await fetch('/api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody),
                 });
 
+                console.log('[TTS] prefetch response:', response.status, response.statusText);
+
                 if (!response.ok) {
-                    console.error('TTS prefetch error:', response.status);
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        const err = await response.json();
+                        console.error('[TTS] prefetch API error:', err.error);
+                    } else {
+                        const text = await response.text();
+                        console.error('[TTS] prefetch non-JSON error:', text.substring(0, 500));
+                    }
                     return null;
                 }
 
-                return await response.arrayBuffer();
+                const audioData = await response.arrayBuffer();
+                console.log('[TTS] prefetch complete, size:', audioData.byteLength, 'bytes');
+                return audioData;
             } catch (err) {
-                console.error('TTS prefetch error:', err);
+                console.error('[TTS] prefetch exception:', err);
                 return null;
             }
         },
