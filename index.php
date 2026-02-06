@@ -734,6 +734,17 @@
                         (OpenAI, Anthropic, Google, ElevenLabs) і нікуди більше. Ви можете безпечно зберігати свої ключі в додатку.
                     </p>
                 </div>
+
+                <div class="bg-gray-700/30 border border-gray-600/50 rounded-lg p-3 space-y-1">
+                    <h3 class="font-semibold text-gray-300 flex items-center gap-2 text-sm">
+                        <span>&#128736;</span> Open Source
+                    </h3>
+                    <p class="text-xs text-gray-400">
+                        AI Talks — проєкт з відкритим кодом. Маєте ідеї для покращення? Знайшли баг?
+                        <a href="https://github.com/vitaliikaplia/aitalks" target="_blank" class="text-blue-400 hover:underline">Завітайте на GitHub</a> —
+                        pull requests та issues вітаються! &#11088;
+                    </p>
+                </div>
             </div>
 
             <!-- Footer -->
